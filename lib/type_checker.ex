@@ -38,9 +38,22 @@ defmodule TypeChecker do
 
   def type_of([:let, x, _y, _z], _t_env), do: raise("#{x} is not a valid identifier")
 
-  def ensure_type_of(type, ast, t_env) do
-    actual_type = type_of(ast, t_env)
-    if type != actual_type, do: raise("expected #{type} got #{actual_type}")
-    actual_type
+  def type_of([:if, x, y, z], t_env) do
+    ensure_type_of(@bool, x, t_env)
+    [type_of(y, t_env), type_of(z, t_env)]
+  end
+
+  def ensure_type_of(expected_type, ast, t_env) do
+    case type_of(ast, t_env) do
+      actual_types when is_list(actual_types) ->
+        actual_types
+        |> Enum.each(&if(&1 != expected_type, do: raise("expected #{expected_type} got #{&1}")))
+
+        hd(actual_types)
+
+      actual_type ->
+        if expected_type != actual_type, do: raise("expected #{expected_type} got #{actual_type}")
+        actual_type
+    end
   end
 end

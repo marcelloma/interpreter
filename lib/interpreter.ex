@@ -28,4 +28,10 @@ defmodule Interpreter do
   end
 
   def eval([:id, [:str, x]], env), do: Env.value_of(x, env)
+
+  def eval([:if, x, y, z], env) do
+    if eval(x, env),
+      do: eval(y, env),
+      else: eval(z, env)
+  end
 end
